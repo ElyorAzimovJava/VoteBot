@@ -9,9 +9,8 @@ import org.example.telegrambot.service.UserService;
 import org.example.telegrambot.service.VoteOptionService;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
-import org.telegram.telegrambots.meta.api.methods.GetUserProfilePhotos;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.*;
 
 @Component
 @RequiredArgsConstructor
@@ -25,38 +24,50 @@ public class ChatBot extends TelegramLongPollingBot{
         if(update.getMessage().hasText()){
             User user = userService.getOrAddUser(update.getMessage());
             System.out.println(user);
-            if(user.getState() == UserState.START){
-             execute(messageFactory.mainMenuForUser(update.getMessage().getChatId().toString()));
-             user.setState(UserState.MAIN_MENU);
-             userService.updateUser(user);
+            if(update.getMessage().getText().equals("/start")){
+                execute(messageFactory.mainMenuForUser(update.getMessage().getChatId().toString()));
+                user.setState(UserState.MAIN_MENU);
+                userService.updateUser(user);
             }
             else if(user.getState() == UserState.MAIN_MENU){
-              if(update.getMessage().getText().equals("OVOZ BERISH"))  {
+              if(update.getMessage().getText().equals("BARCHA MAKTABLAR"))  {
                   user.setState(UserState.VOTE);
                   userService.updateUser(user);
                    execute(messageFactory.getAllOptions(update.getMessage().getChatId().toString()));
-
+                   return;
               }
-
+              else if(update.getMessage().getText().equals("\uD83D\uDCCA STATISTIKA")){
+                      execute(messageFactory.sendStatistic(update.getMessage().getChatId().toString()));
+                      return;
+              }
+              else if(update.getMessage().getText().equals("\uD83D\uDCDD KO'RSATMA")){}
+                   execute(messageFactory.instruction(update.getMessage().getChatId().toString()));
             }
             else if(user.getState() == UserState.VOTE){
-                if(update.getMessage().getText().equals("ORQAGA"))  {
+                if(update.getMessage().getText().equals("\uD83D\uDD19 ORQAGA"))  {
                     SendMessage sendMessage = messageFactory.mainMenuForUser(update.getMessage().getChatId().toString());
                     sendMessage.setText("Asosiy menyu");
                     user.setState(UserState.MAIN_MENU);
                     userService.updateUser(user);
                     execute(sendMessage);
+                    return;
                 }
-                Boolean nameCorrect = voteOptionService.isNameCorrect(update.getMessage().getText());
+                if(user.getIsVote()){
+                   execute( new SendMessage(user.getChatId(),"Siz allaqachon bu telegram account orqali ovoz bergansiz"));
+                    return;
+                }
+                String schoolName = update.getMessage().getText();
+                Boolean nameCorrect = voteOptionService.isNameCorrect(schoolName);
                 if(nameCorrect){
                     user.setState(UserState.CONTACT_SHARE);
+                    user.setVotedSchoolName(schoolName);
                     userService.updateUser(user);
                     execute(messageFactory.vote(update.getMessage().getChatId().toString()));
                 }
             }
             else if(user.getState() == UserState.CONTACT_SHARE){
-                if(update.getMessage().getText().equals("ORQAGA"))  {
-                    SendMessage sendMessage = messageFactory.vote(update.getMessage().getChatId().toString());
+                if(update.getMessage().getText().equals("\uD83D\uDD19 ORQAGA"))  {
+                    SendMessage sendMessage = messageFactory.getAllOptions(update.getMessage().getChatId().toString());
                     sendMessage.setText("Tanlang");
                     user.setState(UserState.VOTE);
                     userService.updateUser(user);
@@ -65,6 +76,11 @@ public class ChatBot extends TelegramLongPollingBot{
             }
 
         }
+
+        else if(update.getMessage().getUserShared() != null){
+            System.out.println("Hello");
+        }
+
         else if(update.getMessage().hasContact()){
             String chatId = update.getMessage().getChatId().toString();
             User userByChatId = userService.getUserByChatId(chatId);
@@ -79,6 +95,7 @@ public class ChatBot extends TelegramLongPollingBot{
             userByChatId.setPhoneNumber(update.getMessage().getContact().getPhoneNumber());
             userByChatId.setState(UserState.MAIN_MENU);
             userByChatId.setIsVote(true);
+            voteOptionService.increaseVoteCount(userByChatId.getVotedSchoolName());
             userService.updateUser(userByChatId);
             SendMessage sendMessage = messageFactory.mainMenuForUser(update.getMessage().getChatId().toString());
             sendMessage.setText("Ovozingiz qabul qilindi.Bizning xizmatdan foydalanganingiz uchun rahmat.");
@@ -90,7 +107,7 @@ public class ChatBot extends TelegramLongPollingBot{
 
     @Override
     public String getBotUsername() {
-        return "t.me/BekobodTumaniMaktabReytingBot.";
+        return "https://t.me/BekobodTumaniMaktabReytingBot";
     }
 
     @Override

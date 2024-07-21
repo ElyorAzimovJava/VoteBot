@@ -23,7 +23,7 @@ public class UserService {
         }
         else {
             User newUser = new User(from.getId().toString(), from.getUserName(), from.getFirstName(),
-                    from.getLastName(), UserState.START, true,null,false);
+                    from.getLastName(), UserState.START, true,null,false,null);
             userRepository.save(newUser);
             return newUser;
         }

@@ -1,7 +1,5 @@
 package org.example.telegrambot.button;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.example.telegrambot.model.VoteOptions;
 import org.example.telegrambot.repository.VotesOptionsRepository;
@@ -29,13 +27,13 @@ public class ButtonFactory {
         return mainReplayKeyBoardMarkub;
     }
     public ReplyKeyboardMarkup getMainMenu(){
-        ReplyKeyboardMarkup vote = new ReplyKeyboardMarkup(List.of(new KeyboardRow(List.of(new KeyboardButton("OVOZ BERISH")))));
+        ReplyKeyboardMarkup vote = new ReplyKeyboardMarkup(List.of(new KeyboardRow(List.of(new KeyboardButton("BARCHA MAKTABLAR"))), new KeyboardRow(List.of(new KeyboardButton("\uD83D\uDCCA STATISTIKA"), new KeyboardButton("\uD83D\uDCDD KO'RSATMA")))));
         vote.setSelective(true);
         vote.setResizeKeyboard(true);
         return vote;
     }
     public KeyboardRow backButton (){
-        return new KeyboardRow(List.of(new KeyboardButton("ORQAGA")));
+        return new KeyboardRow(List.of(new KeyboardButton("\uD83D\uDD19 ORQAGA")));
     }
     public ReplyKeyboardMarkup getContactButton(){
         ReplyKeyboardMarkup contactButton = new ReplyKeyboardMarkup();
@@ -48,6 +46,8 @@ public class ButtonFactory {
         contactButton.setKeyboard(keyboardRows);
         contactButton.setSelective(true);
         contactButton.setResizeKeyboard(true);
+
         return contactButton;
     }
+
 }

@@ -14,7 +14,6 @@ public class TelegramBotApplication {
         bean.init();
         String property = System.getProperty("user.dir");
         System.out.println(property);
-
     }
 
 }

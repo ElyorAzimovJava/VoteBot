@@ -1,5 +1,6 @@
 package org.example.telegrambot.service;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.example.telegrambot.repository.VotesOptionsRepository;
 import org.springframework.stereotype.Service;
@@ -11,7 +12,8 @@ public class VoteOptionService  {
     public Boolean isNameCorrect(String name){
          return votesOptionsRepository.existsByName(name);
     }
-    public void IncreaseVoteCount(String name){
-
+    @Transactional
+    public void increaseVoteCount(String name){
+         votesOptionsRepository.increaseCount(name);
     }
 }

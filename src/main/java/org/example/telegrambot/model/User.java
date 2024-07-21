@@ -27,4 +27,5 @@ public class User extends BaseEntity{
     private Boolean isAdmin;
     private String phoneNumber;
     private Boolean isVote;
+    private String votedSchoolName;
 }
